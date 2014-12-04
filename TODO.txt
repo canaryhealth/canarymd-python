@@ -1,0 +1,13 @@
+=====
+TODOs
+=====
+
+
+* generate documentation from source (sphinx?)
+
+* pull README example from canarymd/client.py example
+
+* add lots of documentation
+
+* add CMA upload/download command
+
