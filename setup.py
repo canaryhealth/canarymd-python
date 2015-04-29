@@ -26,7 +26,7 @@ test_dependencies = [
 
 dependencies = [
   'distribute           >= 0.6.24',
-  'six                  >= 1.6.1',
+  'six                  >= 1.4.1',
   'requests             >= 2.2.1',
   'aadict               >= 0.2.1',
   'morph                >= 0.1.1',
