@@ -30,6 +30,7 @@ dependencies = [
   'requests             >= 2.2.1',
   'aadict               >= 0.2.1',
   'morph                >= 0.1.1',
+  'asset                >= 0.6',
 ]
 
 entrypoints = {
