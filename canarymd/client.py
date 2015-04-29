@@ -11,6 +11,7 @@ import requests
 from aadict import aadict
 import morph
 import json
+import asset
 
 #------------------------------------------------------------------------------
 
@@ -93,8 +94,8 @@ class Client(object):
     }.get(env,           'https://api-{env}.canary.md/api').format(env=env)
     self.session    = requests.Session()
     self.session.headers['content-type'] = 'application/json'
+    self._version   = aadict(client=asset.version('canarymd'))
     self._checkVersion()
-    self.apiVersion = 'v1'
 
   #----------------------------------------------------------------------------
   def _checkVersion(self):
@@ -102,13 +103,14 @@ class Client(object):
     if 'apis' not in res:
       sapi = res.get('api', 'UNKNOWN')
       if sapi == '1.1.0':
+        self._version.update(api='v1', server=res.get('server'))
         return
       raise ProtocolError(
         'incompatible client/server versions (1.1.0 != %s)' % (sapi,))
     sapi = res.get('apis', [])
     for version in ('v2',):
       if version in sapi:
-        self.apiVersion = version
+        self._version.update(api=version, server=res.get('server'))
         self.root += '/' + version
         return
     raise ProtocolError(
@@ -147,6 +149,10 @@ class Client(object):
     err = self._apiError(res)
     log.error('post-authentication authorization failure: %s', err)
     raise AuthorizationError(err)
+
+  #----------------------------------------------------------------------------
+  def version(self):
+    return self._version
 
   #----------------------------------------------------------------------------
   def select(self, context, peo, timeout=None):

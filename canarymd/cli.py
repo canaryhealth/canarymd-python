@@ -83,10 +83,11 @@ def main(args=None):
 
   cli.add_argument(
     'command', metavar=_('COMMAND'),
-    help=_('the canarymd command (currently, only "select" is available)'))
+    help=_('the canarymd command; must be one of: "select" or "version"'))
 
   cli.add_argument(
     'datafile', metavar=_('FILENAME'),
+    nargs='?', default=None,
     help=_('the data file, in JSON format, containing the PEO details'))
 
   # /todo
@@ -94,7 +95,7 @@ def main(args=None):
 
   options = cli.parse_args(args)
 
-  if options.command != 'select':
+  if options.command not in ('select', 'version'):
     cli.error('unsupported/unknown command: %r' % (options.command,))
 
   if options.verbose > 2:
@@ -110,18 +111,17 @@ def main(args=None):
 
   peo = dict(purpose=options.purpose, transport=options.transport)
 
-  try:
-
-    with open(options.datafile, 'rb') as fp:
-      data = json.loads(fp.read())
-      peo.update(data)
-
-  except Exception as err:
-    print >> sys.stderr, \
-      '[**] ERROR: could not open and/or parse data file: %r' \
-      % (options.datafile,)
-    print >> sys.stderr, '[**]      : %s' % (err)
-    return 10
+  if options.datafile:
+    try:
+      with open(options.datafile, 'rb') as fp:
+        data = json.loads(fp.read())
+        peo.update(data)
+    except Exception as err:
+      print >> sys.stderr, \
+        '[**] ERROR: could not open and/or parse data file: %r' \
+        % (options.datafile,)
+      print >> sys.stderr, '[**]      : %s' % (err)
+      return 10
 
   try:
 
@@ -130,6 +130,13 @@ def main(args=None):
       credential  = options.password,
       env         = options.env,
     )
+
+    if options.command == 'version':
+      version = cli.version()
+      print 'server:', version.server
+      print 'client:', version.client
+      print 'protocol:', version.api
+      return 0
 
     selection = cli.select(
       context     = options.context,
