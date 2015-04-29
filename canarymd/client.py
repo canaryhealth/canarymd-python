@@ -88,11 +88,31 @@ class Client(object):
     self.credential = credential
     self.env        = env
     self.root       = root or {
-      Environment.PROD : 'https://api.canary.md',
-      Environment.DEV  : 'http://api-dev.canary.md:8899',
-    }.get(env,           'https://api-{env}.canary.md').format(env=env)
+      Environment.PROD : 'https://api.canary.md/api',
+      Environment.DEV  : 'http://api-dev.canary.md:8899/api',
+    }.get(env,           'https://api-{env}.canary.md/api').format(env=env)
     self.session    = requests.Session()
     self.session.headers['content-type'] = 'application/json'
+    self._checkVersion()
+    self.apiVersion = 'v1'
+
+  #----------------------------------------------------------------------------
+  def _checkVersion(self):
+    res = self.session.get(self.root + '/version').json()
+    if 'apis' not in res:
+      sapi = res.get('api', 'UNKNOWN')
+      if sapi == '1.1.0':
+        return
+      raise ProtocolError(
+        'incompatible client/server versions (1.1.0 != %s)' % (sapi,))
+    sapi = res.get('apis', [])
+    for version in ('v2',):
+      if version in sapi:
+        self.apiVersion = version
+        self.root += '/' + version
+        return
+    raise ProtocolError(
+      'incompatible client/server versions ("v2" not in %r)' % (sapi,))
 
   #----------------------------------------------------------------------------
   def _apiError(self, res):
@@ -113,7 +133,7 @@ class Client(object):
     res = getattr(self.session, method)(self.root + url, data=data, *args, **kw)
     if res.status_code != 401:
       return res
-    res = self.session.post(self.root + '/api/auth/session', json.dumps({
+    res = self.session.post(self.root + '/auth/session', json.dumps({
       'username' : self.principal,
       'password' : self.credential,
     }))
@@ -199,7 +219,7 @@ class Client(object):
     }
     if timeout is not None:
       params['timeout'] = timeout
-    res = self._req('post', '/api/selection', params)
+    res = self._req('post', '/selection', params)
     if res.status_code != 200:
       err = self._apiError(res)
       log.error('selection failure: %s', err)
