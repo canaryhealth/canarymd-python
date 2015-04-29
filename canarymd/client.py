@@ -53,10 +53,10 @@ class Environment:
 #------------------------------------------------------------------------------
 class Client(object):
 
-  # todo: add 
+  # todo: add
 
   #----------------------------------------------------------------------------
-  def __init__(self, principal, credential, env=Environment.PROD):
+  def __init__(self, principal, credential, env=Environment.PROD, root=None):
     '''
     Constructs a new `canarymd.Client` object that is used to
     communicate with the Canary API. The following parameterns
@@ -87,7 +87,7 @@ class Client(object):
     self.principal  = principal
     self.credential = credential
     self.env        = env
-    self.root       = {
+    self.root       = root or {
       Environment.PROD : 'https://api.canary.md',
       Environment.DEV  : 'http://api-dev.canary.md:8899',
     }.get(env,           'https://api-{env}.canary.md').format(env=env)
@@ -137,11 +137,11 @@ class Client(object):
 
     :Parameters:
 
-    context : str
+    context : str, required
 
       The Canary context under which to make this messaging request.
 
-    peo : dict
+    peo : dict, required
 
       The Patient Engagement Opportunity (PEO) description. See the
       Canary documentation for a detailed description of all possible
@@ -149,14 +149,30 @@ class Client(object):
 
       transport : str, required
 
-        How the PEO is being delivered to the `recipient`. Must be
-        one of the transports defined in `canarymd.Transport`.
+        How the PEO is being delivered to the `recipient`. Must be one
+        of the transports defined in `canarymd.Transport`. For the
+        ``paper`` transport, `width` and `height` are required.
 
       purpose : str, required
 
         What the relative purpose of the PEO is to the patient
         circumstance.Must be one of the transports defined in
         `canarymd.Purpose`.
+
+      width : int, default: null
+
+        Indicative width of the available space in pixels.
+
+        *Indicative* means that Canary will attempt to fill the space
+        completely, but may go over or under by some amount.
+
+        For ``paper`` transports, the physical dimensions should be
+        converted to pixels using a 300 DPI resolution.
+
+      height : int, default: null
+
+        Indicative height of the available space in pixels. See
+        `width` for details.
 
       recipient : { dict, str }, required
 
