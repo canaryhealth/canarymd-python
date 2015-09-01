@@ -260,6 +260,18 @@ class Client(object):
       return None
     return Selection(jdat)
 
+  #----------------------------------------------------------------------------
+  def reasons(self):
+    '''
+    Returns the list of all known reasons-for-visit known to Canary.
+    '''
+    res = self._req('get', '/reason')
+    if res.status_code != 200:
+      err = self._apiError(res)
+      log.error('reasons fetch failure: %s', err)
+      raise ProtocolError(err)
+    return aadict.d2ar(res.json().get('reasons', []))
+
 
 #------------------------------------------------------------------------------
 class Selection(object):
