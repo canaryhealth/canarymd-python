@@ -64,13 +64,13 @@ def main(args=None):
   cli.add_argument(
     _('--purpose'), metavar=_('PURPOSE'),
     dest='purpose', default=client.Purpose.DISCOVER,
-    help=_('the selection\'s purpose'))
+    help=_('the selection\'s purpose (default: %(default)r)'))
 
   # todo: make this required?
   cli.add_argument(
     _('--transport'), metavar=_('TRANSPORT'),
     dest='transport', default=client.Transport.SITE,
-    help=_('the selection\'s transport'))
+    help=_('the selection\'s transport (default: %(default)r)'))
 
   cli.add_argument(
     _('-t'), _('--timeout'), metavar=_('SECONDS'),
