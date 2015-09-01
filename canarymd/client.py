@@ -85,15 +85,15 @@ class Client(object):
     if env not in Environment.ALL:
       raise ValueError('invalid/unknown environment: %r' % (env,))
     self.cookies    = {}
-    self.principal  = principal
-    self.credential = credential
     self.env        = env
     self.root       = root or {
       Environment.PROD : 'https://api.canary.md/api',
       Environment.DEV  : 'http://api-dev.canary.md:8899/api',
     }.get(env,           'https://api-{env}.canary.md/api').format(env=env)
-    self.session    = requests.Session()
-    self.session.headers['content-type'] = 'application/json'
+    self.principal  = None
+    self.credential = None
+    self.session    = None
+    self.updateAuth(principal, credential)
     self._version   = aadict(client=asset.version('canarymd'))
     self._checkVersion()
 
@@ -154,6 +154,24 @@ class Client(object):
   #----------------------------------------------------------------------------
   def version(self):
     return self._version
+
+  #----------------------------------------------------------------------------
+  def updateAuth(self, principal, credential):
+    '''
+    Updates this connection's authentication credentials to
+    Canary. This is typically used in server context when the
+    credentials are updated and a reboot of the server is not desired.
+    '''
+    # todo: perhaps keep a hash of the auth? but how to provide that
+    #       to the server then? we could force a re-auth immediately...
+    if self.principal == principal and self.credential == credential:
+      return self
+    self.principal  = principal
+    self.credential = credential
+    # todo: or just de-auth the current session?...
+    self.session    = requests.Session()
+    self.session.headers['content-type'] = 'application/json'
+    return self
 
   #----------------------------------------------------------------------------
   def select(self, context, peo, timeout=None):
@@ -242,6 +260,7 @@ class Client(object):
       return None
     return Selection(jdat)
 
+
 #------------------------------------------------------------------------------
 class Selection(object):
   '''
@@ -249,7 +268,7 @@ class Selection(object):
 
   :Attributes:
 
-  id : UUID
+  id : uuid
 
     The unique identifier for this selection.
 
