@@ -130,6 +130,7 @@ class Client(object):
 
   #----------------------------------------------------------------------------
   def _req(self, method, url, data=None, *args, **kw):
+    log.debug('sending %r request to %r', method, url)
     if data is not None:
       data = json.dumps(data)
     res = getattr(self.session, method)(self.root + url, data=data, *args, **kw)
