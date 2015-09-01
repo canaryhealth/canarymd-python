@@ -3,7 +3,7 @@ PROJECT = canarymd
 test:
 	nosetests --verbose
 
-dist:
+pkg:
 	python setup.py sdist
 
 upload:
