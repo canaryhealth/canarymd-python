@@ -2,6 +2,14 @@
 ChangeLog
 =========
 
+
+v0.1.3
+======
+
+* Added `Client.updateAuth()` method
+* Added `Client.reasons()` method
+
+
 v0.1.2
 ======
 
