@@ -3,6 +3,12 @@ TODOs
 =====
 
 
+* add support to:
+  - list partners
+  - list contexts
+
+* add support for x-active-partner-id
+
 * generate documentation from source (sphinx?)
 
 * pull README example from canarymd/client.py example
